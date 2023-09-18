@@ -1,12 +1,41 @@
 const bcrypt = require('bcrypt');
 const registerValidator = require('../validator/registerValidator')
-const User = require('../models/User')
+const loginValidator = require('../validator/loginValidator')
+const User = require('../models/User');
+const { serverErr, resourceErr } = require('../utils/error');
+const jwt = require('jsonwebtoken')
 
 module.exports = {
     login(req, res) {
-        console.log(req.body);
-        res.json("This is the login route.")
+        const { email, password } = req.body
+        const validate = loginValidator({ email, password })
+
+        if (!validate.isValid) {
+            return res.status(400).json(validate.error)
+        }
+
+        User.findOne({ email })
+            .then(user => {
+                if (!user) return resourceErr(res, 'No user found with this email!')
+
+                bcrypt.compare(password, user.password, function (err, result) {
+                    if (err) resourceErr(res, 'Something error happend!')
+
+                    if (!result) resourceErr(res, 'No user found with this password!')
+
+                    if (result) {
+                        // const { password, ...userData } = user._doc
+
+                        const token = jwt.sign({ _id: user._id, name: user.name, email: user.email },
+                            process.env.SECRET_KEY, { expiresIn: '1h' })
+
+                        res.status(200).json({ message: 'Successfully logged in.', token })
+                    }
+                });
+            })
+            .catch(err => serverErr(res, err))
     },
+
     register(req, res) {
         const { name, email, password, confirmPassword } = req.body
         const validate = registerValidator({ name, email, password, confirmPassword })
@@ -17,37 +46,28 @@ module.exports = {
             User.findOne({ email })
                 .then((user) => {
                     if (user) {
-                        return res.json({ message: "Error! This email already exists!" })
+                        return resourceErr(res, "Error! This email already exists!")
                     }
 
                     // hash password
                     bcrypt.hash(password, 10, function (err, hash) {
-                        if (err) {
-                            return res.json({ message: "Server error", err })
-                        }
+                        if (err) res.json({ message: "Server error", err })
 
                         const user = new User({ name, email, password: hash })
                         // Everything is ok, 
                         // now time to save that data
                         user.save()
                             .then(data => {
-                                const { password, ...others } = data._doc
-                                return res.json({ message: "User saved successfully.", others })
+                                const { password, ...userData } = data._doc
+                                return res.json({ message: "User saved successfully.", userData })
                             })
                             .catch(err => {
                                 console.log(err);
-                                return res.json({ message: "Something went wrong, user can't be saved!" })
+                                return serverErr(res, err)
                             })
                     });
                 })
-                .catch(err => {
-                    console.log(err);
-                    res.json({ message: "Server error", err })
-                })
-
-
+                .catch(err => serverErr(res, err))
         }
-
-
     }
 }

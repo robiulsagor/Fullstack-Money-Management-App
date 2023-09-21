@@ -41,11 +41,12 @@ module.exports = {
         const validate = registerValidator({ name, email, password, confirmPassword })
 
         if (!validate.isValid) {
-            return res.json(validate.error)
+            return res.json(validate)
         } else {
             User.findOne({ email })
                 .then((user) => {
                     if (user) {
+                        return res.json({ error: { "email": "This email already exists! Please login" } })
                         return resourceErr(res, "Error! This email already exists!")
                     }
 
@@ -69,5 +70,40 @@ module.exports = {
                 })
                 .catch(err => serverErr(res, err))
         }
+    },
+    async getAllUsers(req, res) {
+        try {
+            // User.find()
+            //     .then(data => {
+            //         return res.json(data)
+            //     })
+            //     .catch(err => res.json("error  occured"))
+            const all = await User.find()
+            return res.json(all)
+        } catch (error) {
+            res.json("error")
+        }
+    },
+    deleteUser(req, res) {
+        const _id = req.params.id
+        User.deleteOne({ _id })
+            .then(data => {
+                console.log(data)
+                res.json(data)
+            })
+            .catch(err => console.log(err))
+    },
+    userDetails(req, res) {
+        let _id = req.params.id
+
+        User.findOne({ _id })
+            .then(data => {
+                console.log(data);
+                return res.json(data)
+            })
+            .catch(err => {
+                console.log(err);
+                res.json(err)
+            })
     }
 }

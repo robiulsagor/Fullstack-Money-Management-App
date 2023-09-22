@@ -14,6 +14,7 @@ const Register = () => {
     const dispatch = useDispatch()
 
     const error = useSelector(getError)
+    // console.log(error);
     let success = useSelector(successStatus)
     let loading = useSelector(getLoadingStatus)
 

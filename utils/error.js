@@ -4,6 +4,6 @@ module.exports = {
         res.status(500).json({ message: "Server error", err })
     },
     resourceErr(res, message) {
-        res.status(400).json({ error: { message } })
+        res.json({ error: { message } })
     }
 }

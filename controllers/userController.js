@@ -11,7 +11,7 @@ module.exports = {
         const validate = loginValidator({ email, password })
 
         if (!validate.isValid) {
-            return res.status(400).json(validate.error)
+            return res.json(validate)
         }
 
         User.findOne({ email })
@@ -20,16 +20,16 @@ module.exports = {
 
                 bcrypt.compare(password, user.password, function (err, result) {
                     if (err) resourceErr(res, 'Something error happend!')
-
-                    if (!result) resourceErr(res, 'No user found with this password!')
-
+                    if (!result) return res.json({ error: { password: "No user found" } })
                     if (result) {
-                        // const { password, ...userData } = user._doc
 
                         const token = jwt.sign({ _id: user._id, name: user.name, email: user.email },
                             process.env.SECRET_KEY, { expiresIn: '1h' })
 
-                        res.status(200).json({ message: 'Successfully logged in.', token })
+                        res.status(200).cookie('token', token, {
+                            maxAge: 3600000,
+                            httpOnly: true
+                        }).json({ message: 'Successfully logged in.', token, userData: { _id: user._id, name: user.name, email: user.email } })
                     }
                 });
             })
@@ -47,7 +47,6 @@ module.exports = {
                 .then((user) => {
                     if (user) {
                         return res.json({ error: { "email": "This email already exists! Please login" } })
-                        return resourceErr(res, "Error! This email already exists!")
                     }
 
                     // hash password
@@ -84,11 +83,13 @@ module.exports = {
             res.json("error")
         }
     },
+    decoded(req, res) {
+        return res.send("hello")
+    },
     deleteUser(req, res) {
         const _id = req.params.id
         User.deleteOne({ _id })
             .then(data => {
-                console.log(data)
                 res.json(data)
             })
             .catch(err => console.log(err))
@@ -98,12 +99,15 @@ module.exports = {
 
         User.findOne({ _id })
             .then(data => {
-                console.log(data);
                 return res.json(data)
             })
             .catch(err => {
                 console.log(err);
                 res.json(err)
             })
+    },
+    logout(req, res) {
+        console.log("logging out!!");
+        return res.clearCookie('token').json({ message: "Logged out successfully" })
     }
 }

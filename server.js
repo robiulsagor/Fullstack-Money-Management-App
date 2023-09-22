@@ -1,17 +1,26 @@
 const express = require("express")
 const morgan = require("morgan")
 const cors = require("cors")
+var cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
 require('dotenv').config()
 
 const userRouter = require("./routers/userRoute")
+const { authenticate } = require("./middlewares/authenticate")
 
 const app = express()
 app.use(morgan('dev'))
 app.use(cors())
 app.use(express.json())
+app.use(cookieParser())
 
 app.use('/api/users', userRouter)
+
+app.get('/api/decoded', authenticate, (req, res) => {
+    const { decodedData } = res.locals;
+    console.log(decodedData);
+    res.json(decodedData)
+})
 
 app.get('/', (req, res) => {
     res.send("Its working!")

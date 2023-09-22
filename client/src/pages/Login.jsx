@@ -1,15 +1,34 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { getError, isAuthenticated, login } from '../features/userSlice'
+import { redirect, useNavigate } from "react-router-dom";
 
 const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [formSubmitted, setFormSubmitted] = useState(false)
+
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
 
 
+    const error = useSelector(getError)
+    const isLoggedIn = useSelector(isAuthenticated)
 
     const submitHandler = e => {
         e.preventDefault()
+        setFormSubmitted(true)
+
+        dispatch(login({
+            email, password
+        }))
     }
+
+    useEffect(() => {
+        isLoggedIn && navigate("/")
+    }, [submitHandler])
+
 
     return (
         <div className="row mt-3">
@@ -22,10 +41,16 @@ const Login = () => {
                         <input
                             type="text"
                             id="email"
-                            className='form-control'
+                            className={(formSubmitted && error.email) ? 'form-control is-invalid' : 'form-control '}
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             placeholder='Enter your email' />
+
+                        {(formSubmitted && error.email) && (
+                            <div className="invalid-feedback">
+                                {error.email}
+                            </div>
+                        )}
                     </div>
 
                     <div className="mb-3">
@@ -33,10 +58,16 @@ const Login = () => {
                         <input
                             type="password"
                             id="password"
-                            className='form-control'
+                            className={(formSubmitted && error.password) ? 'form-control is-invalid' : 'form-control '}
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder='Enter your famous password' />
+
+                        {(formSubmitted && error.password) && (
+                            <div className="invalid-feedback">
+                                {error.password}
+                            </div>
+                        )}
                     </div>
 
                     <span>

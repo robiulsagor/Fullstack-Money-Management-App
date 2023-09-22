@@ -4,13 +4,15 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { store } from './store/index'
+import { persistor, store } from './store/index'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Home from './pages/Home.jsx'
 import Login from './pages/Login.jsx'
 import Error from './pages/Error.jsx'
 import Register from './pages/Register.jsx'
 import Users from './pages/Users';
+
+import { PersistGate } from 'redux-persist/integration/react';
 
 const router = createBrowserRouter([
   {
@@ -38,7 +40,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     {/* <App /> */}
     <div className='container'>
       <Provider store={store}>
-        <RouterProvider router={router} />
+        <PersistGate loading={null} persistor={persistor}>
+          <RouterProvider router={router} />
+        </PersistGate>
       </Provider>
     </div>
   </React.StrictMode>,

@@ -18,6 +18,24 @@ export const register = createAsyncThunk('user/register', async (data) => {
     }
 })
 
+export const login = createAsyncThunk('user/login', async (data) => {
+    try {
+        const response = await axios.post('/api/users/login', data)
+        return response.data
+    } catch (error) {
+        return error.message
+    }
+})
+
+export const logout = createAsyncThunk('user/logout', async (state, action) => {
+    try {
+        const response = await axios.post('/api/users/logout')
+        return response.data
+    } catch (error) {
+        return error.message
+    }
+})
+
 const userSlice = createSlice({
     name: 'user',
     initialState,
@@ -31,7 +49,6 @@ const userSlice = createSlice({
                 state.loading = true
             })
             .addCase(register.fulfilled, (state, action) => {
-                console.log(action.payload);
                 state.loading = false
                 if (action.payload.error !== undefined) {
                     state.error = action.payload.error
@@ -40,12 +57,37 @@ const userSlice = createSlice({
                     state.success = true
                 }
             })
+            .addCase(login.pending, (state, action) => {
+                state.error = {}
+                state.user = {}
+                state.success = false
+                state.loading = true
+                state.isAuthenticated = false
+            })
+            .addCase(login.fulfilled, (state, action) => {
+                state.loading = false
+                if (action.payload.error !== undefined) {
+                    state.error = action.payload.error
+                } else {
+                    state.user = action.payload.userData
+                    state.success = true
+                    state.isAuthenticated = Object.keys(state.user).length !== 0
+                }
+            })
+            .addCase(logout.fulfilled, (state, action) => {
+                state.error = {}
+                state.user = {}
+                state.success = false
+                state.loading = false
+                state.isAuthenticated = false
+            })
     }
 })
 
-export const getError = state => state.user.error
-export const successStatus = state => state.user.success
-export const getLoadingStatus = state => state.user.loading
+export const getError = state => state.error
+export const successStatus = state => state.success
+export const getLoadingStatus = state => state.loading
+export const isAuthenticated = state => state.isAuthenticated
 
 
 export default userSlice.reducer

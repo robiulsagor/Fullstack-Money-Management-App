@@ -1,19 +1,34 @@
-import { Link, NavLink } from "react-router-dom"
-
+import axios from "axios"
+import { useDispatch, useSelector } from 'react-redux'
+import { isAuthenticated, logout } from "../features/userSlice"
+import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
 const Home = () => {
-    return (
-        <div>
-            <div>
-                <h2>Welcome to Homepage</h2>
-            </div>
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
 
-            <NavLink className={({ isActive, isPending }) =>
-                isActive ? 'active' : isPending ? 'pending' : ''} to='/'>Home</NavLink>
-            <NavLink className={({ isActive, isPending }) =>
-                isActive ? 'active' : isPending ? 'pending' : ''} to='/login'>Login</NavLink>
-            <NavLink className={({ isActive, isPending }) =>
-                isActive ? 'active' : isPending ? 'pending' : ''} to='/register'> Register</NavLink>
+    const isLoggedIn = useSelector(isAuthenticated)
+
+    const handleLogout = () => {
+        dispatch(logout())
+    }
+
+    useEffect(() => {
+        !isLoggedIn && navigate('/login')
+    }, [handleLogout])
+
+
+    return (
+        <div className="row">
+            <div className="col-8 ">
+
+                <div>
+                    <h2>Welcome to Homepage</h2>
+                </div>
+
+                <button className="btn btn-danger mt-5" onClick={handleLogout}>Logout</button>
+            </div>
         </div>
     )
 }

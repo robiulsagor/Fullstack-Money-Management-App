@@ -6,6 +6,8 @@ const mongoose = require('mongoose')
 require('dotenv').config()
 
 const userRouter = require("./routers/userRoute")
+const transactionRouter = require("./routers/TransactionRoute")
+
 const { authenticate } = require("./middlewares/authenticate")
 
 const app = express()
@@ -15,6 +17,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use('/api/users', userRouter)
+app.use('/api/transactions', transactionRouter)
 
 app.get('/api/decoded', authenticate, (req, res) => {
     const { decodedData } = res.locals;

@@ -13,6 +13,9 @@ import Register from './pages/Register.jsx'
 import Users from './pages/Users';
 
 import { PersistGate } from 'redux-persist/integration/react';
+import Transactions from './pages/Transactions';
+import CreateTransaction from './pages/CreateTransaction';
+import App from './App';
 
 const router = createBrowserRouter([
   {
@@ -31,7 +34,15 @@ const router = createBrowserRouter([
   {
     path: '/users',
     element: <Users />
-  }
+  },
+  {
+    path: '/transactions',
+    element: <Transactions />
+  },
+  {
+    path: '/createTransaction',
+    element: <CreateTransaction />
+  },
 
 ])
 
@@ -41,7 +52,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <div className='container'>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <RouterProvider router={router} />
+          {/* <RootRouter /> */}
+          <App />
         </PersistGate>
       </Provider>
     </div>

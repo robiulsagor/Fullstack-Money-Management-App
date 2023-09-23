@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { login, register, getAllUsers, deleteUser, userDetails, logout, decoded } = require('../controllers/userController')
+const { login, register, getAllUsers, deleteUser, userDetails, logout } = require('../controllers/userController')
 const { authenticate } = require('../middlewares/authenticate')
 
 
@@ -14,7 +14,5 @@ router.delete('/:id', deleteUser)
 router.get('/:id', userDetails)
 
 router.post('/logout', authenticate, logout)
-
-
 
 module.exports = router
